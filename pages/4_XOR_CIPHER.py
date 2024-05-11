@@ -66,14 +66,17 @@ if selected_option == "Symmetric Encryption":
     st.header("Symmetric Encryption")
 
     st.subheader("XOR Cipher")
-    st.write("""
-    The XOR cipher is a simple symmetric encryption algorithm. It works by taking the XOR (exclusive or) of each byte in the plaintext with a corresponding byte in the key. 
-    """)
-    input_text_xor = st.text_area("Plain text:")
-    key_xor = st.text_input("Key:")
-    if st.button("Encrypt using XOR"):
-        encrypted_text_xor = xor_encrypt(input_text_xor.encode(), key_xor.encode())
-        st.write("Ciphertext:", encrypted_text_xor)
+    # XOR Cipher implementation...
+    
+    st.subheader("Caesar Cipher")
+    # Change the ID of the text area to make it unique
+    input_text_caesar = st.text_area("Plain text - Caesar Cipher:")
+    shift_caesar = st.number_input("Shift - Caesar Cipher:", min_value=1, max_value=25, value=3)
+    if st.button("Encrypt using Caesar Cipher"):
+        encrypted_text_caesar = caesar_cipher_encrypt(input_text_caesar, shift_caesar)
+        st.write("Ciphertext:", encrypted_text_caesar)
+
+    # Add more symmetric encryption algorithms here
 
     st.subheader("Caesar Cipher")
     st.write("""
