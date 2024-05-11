@@ -1,5 +1,7 @@
 import streamlit as st
+import hashlib
 
+# Symmetric Encryption Algorithms
 def xor_encrypt(plaintext, key):
     """Encrypts plaintext using XOR cipher with the given key."""
     ciphertext = bytearray()
@@ -10,34 +12,117 @@ def xor_encrypt(plaintext, key):
         ciphertext.append(encrypted_byte)
     return ciphertext
 
-def xor_decrypt(ciphertext, key):
-    """Decrypts ciphertext using XOR cipher with the given key."""
-    return xor_encrypt(ciphertext, key)   # XOR decryption is the same as encryption
+def caesar_cipher_encrypt(plaintext, shift):
+    """Encrypts plaintext using Caesar Cipher with the given shift."""
+    ciphertext = ""
+    for char in plaintext:
+        if char.isalpha():
+            shifted_char = chr((ord(char) - 65 + shift) % 26 + 65) if char.isupper() else chr((ord(char) - 97 + shift) % 26 + 97)
+            ciphertext += shifted_char
+        else:
+            ciphertext += char
+    return ciphertext
 
-st.header("XOR Cipher")
+def aes_encrypt(plaintext, key):
+    """Encrypts plaintext using AES encryption with the given key."""
+    # Implementation of AES encryption algorithm here
+    pass
 
-st.write("""
-XOR Cipher
----------
-The XOR cipher is a simple symmetric encryption algorithm. It works by taking the XOR (exclusive or) of each byte in the plaintext with a corresponding byte in the key. 
-""")
+# Asymmetric Encryption Algorithms
+def rsa_encrypt(plaintext, public_key):
+    """Encrypts plaintext using RSA encryption with the given public key."""
+    # Implementation of RSA encryption algorithm here
+    pass
 
-input_text = st.text_area("Plain text:")
-plaintext = bytes(input_text.encode())
+def ecc_encrypt(plaintext, public_key):
+    """Encrypts plaintext using Elliptic Curve Cryptography with the given public key."""
+    # Implementation of ECC encryption algorithm here
+    pass
 
-key = st.text_input("Key:")
-key = bytes(key.encode())
+# Hashing Functions
+def md5_hash(data):
+    """Computes the MD5 hash of the input data."""
+    return hashlib.md5(data).hexdigest()
 
-if st.button("Submit"):
-    if plaintext.decode() == key.decode():
-        st.error("Plaintext should not be equal to the key")
-    elif not plaintext or not key:
-        st.error("Invalid key")
-    elif len(plaintext.decode()) < len(key.decode()):
-        st.error("Plaintext length should be equal or greater than the length of key")
-    else:
-        encrypted_text = xor_encrypt(plaintext, key)
-        decrypted_text = xor_decrypt(encrypted_text, key)
-        st.write("Ciphertext:", encrypted_text.decode())
-        st.write("Decrypted:", decrypted_text.decode())
+def sha256_hash(data):
+    """Computes the SHA-256 hash of the input data."""
+    return hashlib.sha256(data).hexdigest()
 
+def sha512_hash(data):
+    """Computes the SHA-512 hash of the input data."""
+    return hashlib.sha512(data).hexdigest()
+
+def blake2b_hash(data):
+    """Computes the BLAKE2b hash of the input data."""
+    return hashlib.blake2b(data).hexdigest()
+
+# Streamlit UI
+st.title("Cryptographic Toolbox")
+
+selected_option = st.sidebar.selectbox("Select Cryptographic Operation", 
+                                       ["Symmetric Encryption", "Asymmetric Encryption", "Hashing"])
+
+if selected_option == "Symmetric Encryption":
+    st.header("Symmetric Encryption")
+
+    st.subheader("XOR Cipher")
+    st.write("""
+    The XOR cipher is a simple symmetric encryption algorithm. It works by taking the XOR (exclusive or) of each byte in the plaintext with a corresponding byte in the key. 
+    """)
+    input_text_xor = st.text_area("Plain text:")
+    key_xor = st.text_input("Key:")
+    if st.button("Encrypt using XOR"):
+        encrypted_text_xor = xor_encrypt(input_text_xor.encode(), key_xor.encode())
+        st.write("Ciphertext:", encrypted_text_xor)
+
+    st.subheader("Caesar Cipher")
+    st.write("""
+    The Caesar cipher is a substitution cipher where each letter in the plaintext is shifted a certain number of places down or up the alphabet.
+    """)
+    input_text_caesar = st.text_area("Plain text:")
+    shift_caesar = st.number_input("Shift:", min_value=1, max_value=25, value=3)
+    if st.button("Encrypt using Caesar Cipher"):
+        encrypted_text_caesar = caesar_cipher_encrypt(input_text_caesar, shift_caesar)
+        st.write("Ciphertext:", encrypted_text_caesar)
+
+    # Add more symmetric encryption algorithms here
+
+elif selected_option == "Asymmetric Encryption":
+    st.header("Asymmetric Encryption")
+
+    st.subheader("RSA Encryption")
+    st.write("""
+    RSA (Rivest-Shamir-Adleman) is one of the first public-key cryptosystems and is widely used for secure data transmission. It involves the use of a public key for encryption and a private key for decryption.
+    """)
+    # Add UI elements for RSA encryption here
+
+    st.subheader("Elliptic Curve Cryptography (ECC)")
+    st.write("""
+    Elliptic Curve Cryptography (ECC) is a public-key cryptography algorithm based on the algebraic structure of elliptic curves over finite fields.
+    """)
+    # Add UI elements for ECC encryption here
+
+    # Add more asymmetric encryption algorithms here
+
+elif selected_option == "Hashing":
+    st.header("Hashing")
+
+    st.subheader("MD5 Hash")
+    st.write("""
+    MD5 (Message Digest Algorithm 5) is a widely used cryptographic hash function that produces a 128-bit (16-byte) hash value.
+    """)
+    input_text_md5 = st.text_area("Data:")
+    if st.button("Compute MD5 Hash"):
+        md5_result = md5_hash(input_text_md5.encode())
+        st.write("MD5 Hash:", md5_result)
+
+    st.subheader("SHA-256 Hash")
+    st.write("""
+    SHA-256 (Secure Hash Algorithm 256-bit) is one of the cryptographic hash functions designed by the NSA.
+    """)
+    input_text_sha256 = st.text_area("Data:")
+    if st.button("Compute SHA-256 Hash"):
+        sha256_result = sha256_hash(input_text_sha256.encode())
+        st.write("SHA-256 Hash:", sha256_result)
+
+    # Add more hashing functions here
