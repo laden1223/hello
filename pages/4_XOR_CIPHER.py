@@ -25,9 +25,31 @@ def caesar_cipher_encrypt(plaintext, shift):
 
 def aes_encrypt(plaintext, key):
     """Encrypts plaintext using AES encryption with the given key."""
-    # Implementation of AES encryption algorithm here
-    pass
+    # Pad the plaintext if its length is not a multiple of 16 bytes (AES block size)
+    plaintext = _pad(plaintext)
+    
+    # Split the key into 16-byte blocks
+    key_blocks = [key[i:i+16] for i in range(0, len(key), 16)]
+    
+    # Perform AES encryption on each block of plaintext
+    ciphertext = b""
+    for block in plaintext_blocks:
+        # Perform encryption using the current block and key
+        encrypted_block = _aes_block_encrypt(block, key)
+        ciphertext += encrypted_block
+    
+    return ciphertext
 
+def _pad(data):
+    """Pads the data with PKCS7 padding."""
+    padding_length = 16 - (len(data) % 16)
+    padding = bytes([padding_length]) * padding_length
+    return data + padding
+
+def _aes_block_encrypt(block, key):
+    """Encrypts a single block of data using AES."""
+    # Placeholder for AES encryption algorithm
+    return b""
 # Asymmetric Encryption Algorithms
 def rsa_encrypt(plaintext, public_key):
     """Encrypts plaintext using RSA encryption with the given public key."""
@@ -76,20 +98,6 @@ if selected_option == "Symmetric Encryption":
         encrypted_text_caesar = caesar_cipher_encrypt(input_text_caesar, shift_caesar)
         st.write("Ciphertext:", encrypted_text_caesar)
 
-    # Add more symmetric encryption algorithms here
-
-    st.subheader("Caesar Cipher")
-    st.write("""
-    The Caesar cipher is a substitution cipher where each letter in the plaintext is shifted a certain number of places down or up the alphabet.
-    """)
-    input_text_caesar = st.text_area("Plain text:")
-    shift_caesar = st.number_input("Shift:", min_value=1, max_value=25, value=3)
-    if st.button("Encrypt using Caesar Cipher - Button"):
-        encrypted_text_caesar = caesar_cipher_encrypt(input_text_caesar, shift_caesar)
-        st.write("Ciphertext:", encrypted_text_caesar)
-
-    # Add more symmetric encryption algorithms here
-
 elif selected_option == "Asymmetric Encryption":
     st.header("Asymmetric Encryption")
 
@@ -129,3 +137,42 @@ elif selected_option == "Hashing":
         st.write("SHA-256 Hash:", sha256_result)
 
     # Add more hashing functions here
+    def xor_encrypt(plaintext, key):
+    """Encrypts plaintext using XOR cipher with the given key, st.writeing bits involved."""
+
+    ciphertext = bytearray()
+    
+    for i in range(len(plaintext)):
+        plaintext_byte = plaintext[i]
+        key_byte = key[i % len(key)]
+        encrypted_byte = plaintext_byte^key_byte
+        ciphertext.append(encrypted_byte)
+
+        st.write(f"Plaintext byte: {format(plaintext_byte, '08b')} = {chr(plaintext_byte)}")
+        st.write(f"Key byte:       {format(key_byte, '08b')} = {chr(key_byte)}")
+        st.write(f"XOR result:     {format(encrypted_byte, '08b')} = {chr(encrypted_byte)}")
+        st.write("--------------------")
+        
+    return ciphertext
+
+def xor_decrypt(ciphertext, key):
+    """Decrypts ciphertext using XOR cipher with the given key."""
+    return xor_encrypt(ciphertext, key)   # XOR decryption is the same as encryption
+
+
+
+
+
+if plaintext.decode() == key.decode():
+    st.write("Plaintext should not be equal to the key")
+elif not plaintext or not key:
+    st.write("Invalid key")
+elif len(plaintext.decode()) < len(key.decode()):
+    st.write("Plaintext length should be equal or greater than the length of key")
+else:
+    encrypted_text = xor_encrypt(plaintext, key)
+    st.write("Ciphertext:", encrypted_text.decode())
+    decrypted_text = xor_decrypt(encrypted_text, key)
+    st.write("Decrypted:", decrypted_text.decode())
+st.balloons()
+st.snow()
