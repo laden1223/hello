@@ -84,7 +84,7 @@ if selected_option == "Symmetric Encryption":
     """)
     input_text_caesar = st.text_area("Plain text:")
     shift_caesar = st.number_input("Shift:", min_value=1, max_value=25, value=3)
-    if st.button("Encrypt using Caesar Cipher"):
+    if st.button("Encrypt using Caesar Cipher - Button"):
         encrypted_text_caesar = caesar_cipher_encrypt(input_text_caesar, shift_caesar)
         st.write("Ciphertext:", encrypted_text_caesar)
 
