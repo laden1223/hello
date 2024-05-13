@@ -115,6 +115,7 @@ elif selected_algorithm == "AES":
     key = st.text_input("Key (16/24/32 bytes):")
     key = bytes.fromhex(key)
 
+
     if st.button("Encrypt"):
         ciphertext = aes_encrypt(plaintext, key)
         st.write("Ciphertext (hex):", ciphertext.hex())
