@@ -3,19 +3,23 @@ import rsa
 import base64
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
+import hashlib
 
 # XOR Cipher functions
 def xor_encrypt(plaintext, key):
+    """Encrypts plaintext using XOR cipher with the given key."""
     ciphertext = b''
     for i in range(len(plaintext)):
         ciphertext += bytes([plaintext[i] ^ key[i % len(key)]])
     return ciphertext
 
 def xor_decrypt(ciphertext, key):
+    """Decrypts ciphertext using XOR cipher with the given key."""
     return xor_encrypt(ciphertext, key)  # XOR encryption is its own decryption
 
 # Caesar Cipher functions
 def caesar_cipher_encrypt(plaintext, shift):
+    """Encrypts plaintext using Caesar Cipher with the given shift."""
     result = ''
     for char in plaintext:
         if char.isalpha():
@@ -36,7 +40,21 @@ def caesar_cipher_encrypt(plaintext, shift):
     return result
 
 def caesar_cipher_decrypt(ciphertext, shift):
+    """Decrypts ciphertext using Caesar Cipher with the given shift."""
     return caesar_cipher_encrypt(ciphertext, -shift)
+
+# AES Encryption functions
+def aes_encrypt(plaintext, key):
+    """Encrypts plaintext using AES encryption with the given key."""
+    cipher = AES.new(key, AES.MODE_ECB)
+    ciphertext = cipher.encrypt(pad(plaintext, AES.block_size))
+    return ciphertext
+
+def aes_decrypt(ciphertext, key):
+    """Decrypts ciphertext using AES decryption with the given key."""
+    cipher = AES.new(key, AES.MODE_ECB)
+    plaintext = unpad(cipher.decrypt(ciphertext), AES.block_size)
+    return plaintext
 
 # Streamlit UI
 st.title("Cryptographic Toolbox")
@@ -46,6 +64,9 @@ selected_algorithm = st.sidebar.selectbox("Select Cryptographic Algorithm",
 
 if selected_algorithm == "XOR Cipher":
     st.header("XOR Cipher")
+    st.write("""
+    The XOR cipher is a simple symmetric encryption algorithm. It works by taking the XOR (exclusive or) of each byte in the plaintext with a corresponding byte in the key.
+    """)
 
     input_text = st.text_area("Plain text:")
     plaintext = bytes(input_text.encode())
@@ -68,6 +89,9 @@ if selected_algorithm == "XOR Cipher":
 
 elif selected_algorithm == "Caesar Cipher":
     st.header("Caesar Cipher")
+    st.write("""
+    The Caesar cipher is a substitution cipher where each letter in the plaintext is shifted a certain number of places down or up the alphabet.
+    """)
 
     input_text = st.text_area("Plain text:")
     shift = st.number_input("Shift:")
@@ -81,6 +105,9 @@ elif selected_algorithm == "Caesar Cipher":
 
 elif selected_algorithm == "AES":
     st.header("AES")
+    st.write("""
+    Advanced Encryption Standard (AES) is a symmetric encryption algorithm. It is widely used to secure sensitive data. AES operates on fixed-size blocks and requires a key of a specified length.
+    """)
 
     input_text = st.text_area("Plain text:")
     plaintext = bytes(input_text.encode())
@@ -89,17 +116,18 @@ elif selected_algorithm == "AES":
     key = bytes.fromhex(key)
 
     if st.button("Encrypt"):
-        cipher = AES.new(key, AES.MODE_ECB)
-        ciphertext = cipher.encrypt(pad(plaintext, AES.block_size))
+        ciphertext = aes_encrypt(plaintext, key)
         st.write("Ciphertext (hex):", ciphertext.hex())
 
     if st.button("Decrypt"):
-        cipher = AES.new(key, AES.MODE_ECB)
-        decrypted_text = unpad(cipher.decrypt(bytes.fromhex(st.text_input("Ciphertext (hex):"))), AES.block_size).decode()
-        st.write("Decrypted:", decrypted_text)
+        decrypted_text = aes_decrypt(bytes.fromhex(st.text_input("Ciphertext (hex):")), key)
+        st.write("Decrypted:", decrypted_text.decode())
 
 elif selected_algorithm == "RSA":
     st.header("RSA")
+    st.write("""
+    RSA is a public-key cryptosystem that is widely used for secure data transmission. It involves the use of a public key for encryption and a private key for decryption.
+    """)
 
     input_text = st.text_area("Plain text:")
 
