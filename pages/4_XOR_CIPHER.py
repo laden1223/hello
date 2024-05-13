@@ -5,6 +5,40 @@ import base64
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
+# XOR Cipher functions
+def xor_encrypt(plaintext, key):
+    ciphertext = b''
+    for i in range(len(plaintext)):
+        ciphertext += bytes([plaintext[i] ^ key[i % len(key)]])
+    return ciphertext
+
+def xor_decrypt(ciphertext, key):
+    return xor_encrypt(ciphertext, key)  # XOR encryption is its own decryption
+
+# Caesar Cipher functions
+def caesar_cipher_encrypt(plaintext, shift):
+    result = ''
+    for char in plaintext:
+        if char.isalpha():
+            shifted = ord(char) + shift
+            if char.islower():
+                if shifted > ord('z'):
+                    shifted -= 26
+                elif shifted < ord('a'):
+                    shifted += 26
+            elif char.isupper():
+                if shifted > ord('Z'):
+                    shifted -= 26
+                elif shifted < ord('A'):
+                    shifted += 26
+            result += chr(shifted)
+        else:
+            result += char
+    return result
+
+def caesar_cipher_decrypt(ciphertext, shift):
+    return caesar_cipher_encrypt(ciphertext, -shift)
+
 # Streamlit UI
 st.title("Cryptographic Toolbox")
 
@@ -62,7 +96,7 @@ elif selected_algorithm == "AES":
 
     if st.button("Decrypt"):
         cipher = AES.new(key, AES.MODE_ECB)
-        decrypted_text = cipher.decrypt(bytes.fromhex(st.text_input("Ciphertext (hex):"))).decode()
+        decrypted_text = unpad(cipher.decrypt(bytes.fromhex(st.text_input("Ciphertext (hex):"))), AES.block_size).decode()
         st.write("Decrypted:", decrypted_text)
 
 elif selected_algorithm == "RSA":
@@ -80,4 +114,7 @@ elif selected_algorithm == "RSA":
         ciphertext = rsa.encrypt(input_text.encode(), public_key)
         st.write("Ciphertext (hex):", ciphertext.hex())
 
-    if st.button("
+    if st.button("Decrypt"):
+        private_key = rsa.PrivateKey.load_pkcs1(bytes.fromhex(st.text_input("Private Key (hex):")))
+        decrypted_text = rsa.decrypt(bytes.fromhex(st.text_input("Ciphertext (hex):")), private_key).decode()
+        st.write("Decrypted:", decrypted_text)
