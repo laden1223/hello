@@ -113,7 +113,7 @@ elif selected_algorithm == "AES":
     plaintext = bytes(input_text.encode())
 
     key = st.text_input("Key (16/24/32 bytes):")
-    key = bytes.fromhex(key)
+key = bytes.fromhex(key)
 
 
     if st.button("Encrypt"):
