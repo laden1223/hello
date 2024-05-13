@@ -116,11 +116,11 @@ elif selected_algorithm == "AES":
 key = bytes.fromhex(key)
 
 
-    if st.button("Encrypt"):
+if st.button("Encrypt"):
         ciphertext = aes_encrypt(plaintext, key)
         st.write("Ciphertext (hex):", ciphertext.hex())
 
-    if st.button("Decrypt"):
+if st.button("Decrypt"):
         decrypted_text = aes_decrypt(bytes.fromhex(st.text_input("Ciphertext (hex):")), key)
         st.write("Decrypted:", decrypted_text.decode())
 
