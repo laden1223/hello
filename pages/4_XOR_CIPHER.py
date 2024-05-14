@@ -71,10 +71,10 @@ if selected_algorithm == "XOR Cipher":
     input_text = st.text_area("Plain text:")
     plaintext = bytes(input_text.encode())
 
-    key = st.text_input("key:")
+    key = st.text_input("Key:")
     key = bytes(key.encode())
 
-    if st.button("Submit"):
+    if st.button("Encrypt", key="xor_encrypt"):
         if plaintext.decode() == key.decode():
             st.write("Plaintext should not be equal to the key")
         elif not plaintext or not key:
@@ -83,7 +83,7 @@ if selected_algorithm == "XOR Cipher":
             st.write("Plaintext length should be equal or greater than the length of key")
         else:
             encrypted_text = xor_encrypt(plaintext, key)
-            st.write("Ciphertext:", encrypted_text.decode())
+            st.write("Ciphertext:", encrypted_text.decode('latin1'))
             decrypted_text = xor_decrypt(encrypted_text, key)
             st.write("Decrypted:", decrypted_text.decode())
 
@@ -94,13 +94,14 @@ elif selected_algorithm == "Caesar Cipher":
     """)
 
     input_text = st.text_area("Plain text:")
-    shift = st.number_input("Shift:")
+    shift = st.number_input("Shift:", min_value=-26, max_value=26, step=1)
 
-    if st.button("Submit"):
+    if st.button("Encrypt", key="caesar_encrypt"):
         encrypted_text = caesar_cipher_encrypt(input_text, shift)
         st.write("Ciphertext:", encrypted_text)
 
-        decrypted_text = caesar_cipher_decrypt(encrypted_text, shift)
+    if st.button("Decrypt", key="caesar_decrypt"):
+        decrypted_text = caesar_cipher_decrypt(input_text, shift)
         st.write("Decrypted:", decrypted_text)
 
 elif selected_algorithm == "AES":
@@ -112,16 +113,16 @@ elif selected_algorithm == "AES":
     input_text = st.text_area("Plain text:")
     plaintext = bytes(input_text.encode())
 
-    key = st.text_input("Key (16/24/32 bytes):")
+    key = st.text_input("Key (16/24/32 bytes in hex):")
     key = bytes.fromhex(key)
 
-
-if st.button("Encrypt"):
+    if st.button("Encrypt", key="aes_encrypt"):
         ciphertext = aes_encrypt(plaintext, key)
         st.write("Ciphertext (hex):", ciphertext.hex())
 
-if st.button("Decrypt"):
-        decrypted_text = aes_decrypt(bytes.fromhex(st.text_input("Ciphertext (hex):")), key)
+    if st.button("Decrypt", key="aes_decrypt"):
+        ciphertext = bytes.fromhex(st.text_input("Ciphertext (hex):"))
+        decrypted_text = aes_decrypt(ciphertext, key)
         st.write("Decrypted:", decrypted_text.decode())
 
 elif selected_algorithm == "RSA":
@@ -132,17 +133,20 @@ elif selected_algorithm == "RSA":
 
     input_text = st.text_area("Plain text:")
 
-    if st.button("Generate Keys"):
+    if st.button("Generate Keys", key="rsa_generate_keys"):
         (public_key, private_key) = rsa.newkeys(2048)
         st.write("Public Key:", base64.b64encode(public_key.save_pkcs1()).decode())
         st.write("Private Key:", base64.b64encode(private_key.save_pkcs1()).decode())
 
-    if st.button("Encrypt"):
-        public_key = rsa.PublicKey.load_pkcs1(bytes.fromhex(st.text_input("Public Key (hex):")))
+    if st.button("Encrypt", key="rsa_encrypt"):
+        public_key_data = st.text_area("Public Key (base64):")
+        public_key = rsa.PublicKey.load_pkcs1(base64.b64decode(public_key_data.encode()))
         ciphertext = rsa.encrypt(input_text.encode(), public_key)
         st.write("Ciphertext (hex):", ciphertext.hex())
 
-    if st.button("Decrypt"):
-        private_key = rsa.PrivateKey.load_pkcs1(bytes.fromhex(st.text_input("Private Key (hex):")))
-        decrypted_text = rsa.decrypt(bytes.fromhex(st.text_input("Ciphertext (hex):")), private_key).decode()
+    if st.button("Decrypt", key="rsa_decrypt"):
+        private_key_data = st.text_area("Private Key (base64):")
+        private_key = rsa.PrivateKey.load_pkcs1(base64.b64decode(private_key_data.encode()))
+        ciphertext = bytes.fromhex(st.text_input("Ciphertext (hex):"))
+        decrypted_text = rsa.decrypt(ciphertext, private_key).decode()
         st.write("Decrypted:", decrypted_text)
