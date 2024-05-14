@@ -9,7 +9,7 @@ import os
 
 
 def homepage():
-    st.markdown("<h2>Welcome to Cryptography Toolkit</h2>",  unsafe_allow_html=True)
+    st.markdown("<h2>Welcome to Cryptography Toolkit</h2>", unsafe_allow_html=True)
     st.write("This toolkit provides various cryptographic techniques for encryption, decryption, and hashing.")
     st.write("")
     
@@ -24,6 +24,7 @@ def homepage():
     st.markdown("</div>", unsafe_allow_html=True)
     
     st.write("Please select a technique from the sidebar to get started.")
+
 
 def main():
     st.title("Applied Cryptography Application")
@@ -79,11 +80,11 @@ def main():
         processed_text = ""
         try:
             if selected_crypto == "Caesar Cipher":
-                processed_text, _, _ = caesar_cipher(text, shift_key, if_decrypt)
+                processed_text = caesar_cipher(text, shift_key, if_decrypt)
             elif selected_crypto == "Fernet Symmetric Encryption":
-                processed_text, _, _ = fernet_encrypt_decrypt(text, key, if_decrypt)
+                processed_text, key, _ = fernet_encrypt_decrypt(text, key, if_decrypt)
             elif selected_crypto == "RSA Asymmetric Encryption":
-                processed_text, _, _ = rsa_encrypt_decrypt(text, key, if_decrypt)
+                processed_text = rsa_encrypt_decrypt(text, key, if_decrypt)
             elif selected_crypto == "SHA-1 Hashing":
                 if text_or_file == "Text":
                     processed_text = sha1_hash(text)
@@ -115,14 +116,18 @@ def main():
                         encrypted_data, file_hash = fernet_file_encrypt(file_uploaded, key)
                         if encrypted_data:
                             st.write(f"Encrypted file hash: {file_hash}")
-                            st.download_button("Download Encrypted File", encrypted_data, file_name="Decrypted_" + original_filename)
+                            st.download_button("Download Encrypted File", encrypted_data, file_name="Encrypted_" + original_filename)
                 else:
                     processed_text = "No file uploaded."
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
         else:
-            st.write("Processed Text:", processed_text)
+            if selected_crypto in ["Caesar Cipher", "Fernet Symmetric Encryption", "RSA Asymmetric Encryption"]:
+                st.write("Processed Text:", processed_text)
+            elif selected_crypto in ["SHA-1 Hashing", "SHA-256 Hashing", "SHA-512 Hashing", "MD5 Hashing"]:
+                st.write("Hash Value:", processed_text)
+
 
 def caesar_cipher(text, shift_key, if_decrypt):
     """Encrypts or decrypts text using the Caesar Cipher."""
@@ -138,7 +143,8 @@ def caesar_cipher(text, shift_key, if_decrypt):
             result += chr(new_ascii)
         else:
             result += char
-    return result, None, None  # Caesar Cipher doesn't generate keys
+    return result
+
 
 def fernet_encrypt_decrypt(text, key, if_decrypt):
     """Encrypts or decrypts text using the Fernet symmetric encryption."""
@@ -151,20 +157,9 @@ def fernet_encrypt_decrypt(text, key, if_decrypt):
     else:
         return fernet.encrypt(text.encode()).decode(), key, None
 
+
 def rsa_encrypt_decrypt(text, key, if_decrypt):
     """Encrypts or decrypts text using RSA asymmetric encryption."""
-    if not key:
-        key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-        public_key = key.public_key()
-        # Generate public key and display it
-        public_key_pem = public_key.public_bytes(encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo)
-        st.write("Generated RSA Public Key:")
-        st.code(public_key_pem.decode())
-
-        # Generate private key in PKCS#1 format and display it
-        private_key_pem = key.private_bytes(encoding=serialization.Encoding.PEM, format=serialization.PrivateFormat.TraditionalOpenSSL, encryption_algorithm=serialization.NoEncryption())
-        st.write("Generated RSA Secret Key:")
-        st.code(private_key_pem.decode())
     if if_decrypt:
         try:
             private_key = serialization.load_pem_private_key(
@@ -180,24 +175,32 @@ def rsa_encrypt_decrypt(text, key, if_decrypt):
                     label=None
                 )
             ).decode()
-            return decrypted_text, None, None
+            return decrypted_text
         except Exception as e:
             st.write("Error during decryption:", e)
-            return "Decryption Error: " + str(e), None, None  # Return error message
+            return "Decryption Error: " + str(e)
     else:
-        if isinstance(key, str):
-            key = key.encode()
-        public_key = serialization.load_pem_public_key(key)
-        encrypted_text = public_key.encrypt(text.encode(), padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
-        return base64.b64encode(encrypted_text).decode(), None, key
+        public_key = serialization.load_pem_public_key(key.encode())
+        encrypted_text = public_key.encrypt(
+            text.encode(),
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        return base64.b64encode(encrypted_text).decode()
+
 
 def hash_text(text, algorithm):
     """Hashes the text using the specified algorithm."""
     return hashlib.new(algorithm, text.encode()).hexdigest()
 
+
 def sha1_hash(text):
     """Hashes the text using SHA-1."""
     return hashlib.sha1(text.encode()).hexdigest()
+
 
 def hash_file(file, algorithm):
     """Computes the hash of a file using the specified algorithm."""
@@ -211,6 +214,7 @@ def hash_file(file, algorithm):
     file.seek(0)  # Reset file pointer to beginning after hashing
     return hash_function.hexdigest()
 
+
 def fernet_file_encrypt(file, key):
     """Encrypts a file using Fernet symmetric encryption and computes its hash."""
     if not key:
@@ -220,6 +224,7 @@ def fernet_file_encrypt(file, key):
     encrypted_data = fernet.encrypt(file.read())
     file_hash = hashlib.sha256(encrypted_data).hexdigest()
     return encrypted_data, file_hash
+
 
 def fernet_file_decrypt(file, key, original_filename):
     """Decrypts a file using Fernet symmetric encryption and saves it with the original filename."""
@@ -232,5 +237,5 @@ def fernet_file_decrypt(file, key, original_filename):
         return None, None
 
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
