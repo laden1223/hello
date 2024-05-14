@@ -135,11 +135,15 @@ elif selected_algorithm == "RSA":
 
     if st.button("Generate Keys", key="rsa_generate_keys"):
         (public_key, private_key) = rsa.newkeys(2048)
-        st.write("Public Key:", public_key.save_pkcs1().decode('utf-8'))
-        st.write("Private Key:", private_key.save_pkcs1().decode('utf-8'))
+        st.write("Public Key:")
+        st.code(public_key.save_pkcs1().decode('utf-8'))
+        st.write("Private Key:")
+        st.code(private_key.save_pkcs1().decode('utf-8'))
+
+    public_key_data = st.text_area("Public Key (PEM):")
+    private_key_data = st.text_area("Private Key (PEM):")
 
     if st.button("Encrypt", key="rsa_encrypt"):
-        public_key_data = st.text_area("Public Key (PEM):")
         try:
             public_key = rsa.PublicKey.load_pkcs1(public_key_data.encode('utf-8'))
             ciphertext = rsa.encrypt(input_text.encode(), public_key)
@@ -148,7 +152,6 @@ elif selected_algorithm == "RSA":
             st.write(f"Error loading public key: {e}")
 
     if st.button("Decrypt", key="rsa_decrypt"):
-        private_key_data = st.text_area("Private Key (PEM):")
         try:
             private_key = rsa.PrivateKey.load_pkcs1(private_key_data.encode('utf-8'))
             ciphertext = bytes.fromhex(st.text_input("Ciphertext (hex):"))
