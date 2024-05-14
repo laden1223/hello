@@ -1,13 +1,13 @@
 import streamlit as st
-from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 import hashlib
 import base64
+import rsa
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
-import rsa
 
 def welcome_page():
     st.markdown("<h2>Welcome to Cryptography Toolkit</h2>", unsafe_allow_html=True)
@@ -52,15 +52,18 @@ def caesar_cipher_decrypt(ciphertext, shift):
 
 def aes_encrypt(plaintext, key):
     """Encrypts plaintext using AES encryption with the given key."""
-    cipher = AES.new(key, AES.MODE_ECB)
-    ciphertext = cipher.encrypt(pad(plaintext, AES.block_size))
+    cipher = Cipher(algorithms.AES(key), modes.ECB())
+    encryptor = cipher.encryptor()
+    padded_plaintext = pad(plaintext, AES.block_size)
+    ciphertext = encryptor.update(padded_plaintext) + encryptor.finalize()
     return ciphertext
 
 def aes_decrypt(ciphertext, key):
     """Decrypts ciphertext using AES decryption with the given key."""
-    cipher = AES.new(key, AES.MODE_ECB)
-    plaintext = unpad(cipher.decrypt(ciphertext), AES.block_size)
-    return plaintext
+    cipher = Cipher(algorithms.AES(key), modes.ECB())
+    decryptor = cipher.decryptor()
+    plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+    return unpad(plaintext, AES.block_size)
 
 def rsa_encrypt(text, key):
     """Encrypts text using RSA encryption with the given key."""
