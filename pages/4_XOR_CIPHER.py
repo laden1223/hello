@@ -135,18 +135,24 @@ elif selected_algorithm == "RSA":
 
     if st.button("Generate Keys", key="rsa_generate_keys"):
         (public_key, private_key) = rsa.newkeys(2048)
-        st.write("Public Key:", base64.b64encode(public_key.save_pkcs1()).decode())
-        st.write("Private Key:", base64.b64encode(private_key.save_pkcs1()).decode())
+        st.write("Public Key:", public_key.save_pkcs1().decode('utf-8'))
+        st.write("Private Key:", private_key.save_pkcs1().decode('utf-8'))
 
     if st.button("Encrypt", key="rsa_encrypt"):
-        public_key_data = st.text_area("Public Key (base64):")
-        public_key = rsa.PublicKey.load_pkcs1(base64.b64decode(public_key_data.encode()))
-        ciphertext = rsa.encrypt(input_text.encode(), public_key)
-        st.write("Ciphertext (hex):", ciphertext.hex())
+        public_key_data = st.text_area("Public Key (PEM):")
+        try:
+            public_key = rsa.PublicKey.load_pkcs1(public_key_data.encode('utf-8'))
+            ciphertext = rsa.encrypt(input_text.encode(), public_key)
+            st.write("Ciphertext (hex):", ciphertext.hex())
+        except Exception as e:
+            st.write(f"Error loading public key: {e}")
 
     if st.button("Decrypt", key="rsa_decrypt"):
-        private_key_data = st.text_area("Private Key (base64):")
-        private_key = rsa.PrivateKey.load_pkcs1(base64.b64decode(private_key_data.encode()))
-        ciphertext = bytes.fromhex(st.text_input("Ciphertext (hex):"))
-        decrypted_text = rsa.decrypt(ciphertext, private_key).decode()
-        st.write("Decrypted:", decrypted_text)
+        private_key_data = st.text_area("Private Key (PEM):")
+        try:
+            private_key = rsa.PrivateKey.load_pkcs1(private_key_data.encode('utf-8'))
+            ciphertext = bytes.fromhex(st.text_input("Ciphertext (hex):"))
+            decrypted_text = rsa.decrypt(ciphertext, private_key).decode()
+            st.write("Decrypted:", decrypted_text)
+        except Exception as e:
+            st.write(f"Error loading private key or decrypting: {e}")
